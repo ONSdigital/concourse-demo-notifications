@@ -1,8 +1,10 @@
 import json
-
+import argparse
 import os
+
 import requests
 from github import Github
+import validators
 
 g = Github()
 
@@ -25,14 +27,27 @@ def get_version_compare_url(respository_name):
     return f'https://github.com/ONSdigital/{respository_name}/compare/{previous_version}...{latest_version}'
 
 
-repos = ['concourse-demo-java-service',
-         'concourse-demo-python-service']
+def valid_slack_hook(url):
+    if not validators.url(url):
+        print('Slack hook URL is malformed. Please check and try again')
+        exit(2)
 
-if os.getenv('SLACK_HOOK') == None:
+
+if os.getenv('SLACK_HOOK') is None:
     print('Environment variable SLACK_HOOK not set')
-    exit(2)
+    exit(3)
 
-for repo in repos:
-    url = get_version_compare_url(repo)
-    requests.post(os.getenv('SLACK_HOOK'),
-                  data=json.dumps({"text": f'Commit diff {repo}: {url}'}))
+
+parser = argparse.ArgumentParser(description='Send notification via Slack of version diffs')
+
+parser.add_argument('slack_hook', type=valid_slack_hook,
+                    help='a URL for the Slack webhook')
+
+parser.add_argument('repo_name', type=str,
+                    help='git respository name')
+
+args = parser.parse_args()
+
+url = get_version_compare_url(args.repo_name)
+requests.post(os.getenv('SLACK_HOOK'),
+              data=json.dumps({"text": f'Commit diff {args.repo_name}: {url}'}))
