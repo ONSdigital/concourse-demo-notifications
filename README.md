@@ -1,2 +1,2 @@
-# concourse-demo-deploy-trigger
-This repository is used to trigger deployments to preprod and prod
+# concourse-demo-notifications
+This demo repository is used to send Concourse notifications to Slack.
