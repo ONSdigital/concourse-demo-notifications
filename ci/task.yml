@@ -1,0 +1,21 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: bash
+
+inputs:
+- name: concourse-demo-notifications
+
+params:
+  SLACK_HOOK:
+  REPO_NAME:
+
+run:
+  path: ci/task.sh
+  dir: concourse-demo-notifications
+  args:
+  - $SLACK_HOOK
+  - $REPO_NAME
