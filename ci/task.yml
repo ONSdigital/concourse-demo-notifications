@@ -4,7 +4,7 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: bash
+    repository: kennethreitz/pipenv
 
 inputs:
 - name: concourse-demo-notifications
