@@ -19,7 +19,7 @@ def get_version_compare_url(respository_name):
     tag_names.sort(key=lambda version: list(map(int, version.split('.'))), reverse=True)
 
     if len(tag_names) == 0:
-        print(f'No current or previous versions found in {repo}.')
+        print(f'No current or previous versions found in {respository_name}.')
         exit(1)
     elif len(tag_names) == 1:
         latest_version = tag_names[0]
@@ -51,4 +51,4 @@ if __name__ == '__main__':
 
     url = get_version_compare_url(args.repo_name)
     requests.post(args.slack_hook,
-                  data=json.dumps({"text": f'Commit diff {args.repo_name}: {url}'}))
+                  data=json.dumps({"text": f'Release notes for {args.repo_name}: {url}'}))
