@@ -1,18 +1,21 @@
 import json
 import argparse
-import os
+import re
 
 import requests
+import sys
 from github import Github
 import validators
 
 g = Github()
+semantic_version_regex = re.compile('\d+\.\d+\.\d+')
+
 
 def get_version_compare_url(respository_name):
     repo = g.get_repo(f'ONSdigital/{respository_name}')
     tags = repo.get_tags()
 
-    tag_names = [tag.name for tag in tags]
+    tag_names = [tag.name for tag in tags if semantic_version_regex.match(tag.name)]
     tag_names.sort(key=lambda version: list(map(int, version.split('.'))), reverse=True)
 
     if len(tag_names) == 0:
@@ -29,25 +32,23 @@ def get_version_compare_url(respository_name):
 
 def valid_slack_hook(url):
     if not validators.url(url):
-        print('Slack hook URL is malformed. Please check and try again')
-        exit(2)
+        raise argparse.ArgumentTypeError('Slack hook URL is malformed. Please check and try again.')
+    return url
 
 
-if os.getenv('SLACK_HOOK') is None:
-    print('Environment variable SLACK_HOOK not set')
-    exit(3)
+def parse_args(args):
+    parser = argparse.ArgumentParser(description='Send notification via Slack of version diffs')
+    parser.add_argument('slack_hook', type=valid_slack_hook,
+                        help='a URL for the Slack webhook')
+    parser.add_argument('repo_name', type=str,
+                        help='git respository name')
+    return parser.parse_args(args)
 
 
-parser = argparse.ArgumentParser(description='Send notification via Slack of version diffs')
+if __name__ == '__main__':
 
-parser.add_argument('slack_hook', type=valid_slack_hook,
-                    help='a URL for the Slack webhook')
+    args = parse_args(sys.argv[1:])
 
-parser.add_argument('repo_name', type=str,
-                    help='git respository name')
-
-args = parser.parse_args()
-
-url = get_version_compare_url(args.repo_name)
-requests.post(os.getenv('SLACK_HOOK'),
-              data=json.dumps({"text": f'Commit diff {args.repo_name}: {url}'}))
+    url = get_version_compare_url(args.repo_name)
+    requests.post(args.slack_hook,
+                  data=json.dumps({"text": f'Commit diff {args.repo_name}: {url}'}))
