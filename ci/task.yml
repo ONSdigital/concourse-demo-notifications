@@ -16,6 +16,3 @@ params:
 run:
   path: ci/task.sh
   dir: concourse-demo-notifications
-  args:
-  - $SLACK_HOOK
-  - $REPO_NAME
