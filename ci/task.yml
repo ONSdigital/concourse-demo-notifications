@@ -7,7 +7,7 @@ image_resource:
     repository: kennethreitz/pipenv
 
 inputs:
-- name: concourse-demo-notifications
+- name: notifications
 
 params:
   SLACK_HOOK:
@@ -15,4 +15,4 @@ params:
 
 run:
   path: ci/task.sh
-  dir: concourse-demo-notifications
+  dir: notifications
